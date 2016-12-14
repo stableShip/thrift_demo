@@ -1,7 +1,7 @@
 'use strict';
 var thrift = require('thrift');
-var Calculator = require('./gen-nodejs/Calculator');
-var ttypes = require('./gen-nodejs/tutorial_types');
+var Calculator = require('./thriftMessage/Calculator');
+var ttypes = require('./thriftMessage/tutorial_types');
 var co = require('co');
 
 var transport = thrift.TBufferedTransport;
