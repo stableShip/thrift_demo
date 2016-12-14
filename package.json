@@ -4,7 +4,8 @@
   "description": "thrift_demo",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "thrift_compiler": "thrift --gen js:node --out ./thriftMessage test.thrift"
   },
   "repository": {
     "type": "git",
@@ -17,6 +18,7 @@
   },
   "homepage": "https://github.com/stableShip/thrift_demo",
   "dependencies": {
+    "co": "^4.6.0",
     "thrift": "^0.9.3"
   }
 }

@@ -1,61 +1,54 @@
+'use strict';
 var thrift = require('thrift');
 var Calculator = require('./gen-nodejs/Calculator');
 var ttypes = require('./gen-nodejs/tutorial_types');
-
+var co = require('co');
 
 var transport = thrift.TBufferedTransport;
 var protocol = thrift.TBinaryProtocol;
 
 var connection = thrift.createConnection("localhost", 9090, {
-    transport : transport,
-    protocol : protocol
+    transport: transport,
+    protocol: protocol
 });
 
-connection.on('error', function(err) {
+
+connection.on('error', function (err) {
     assert(false, err);
 });
 
-// Create a Calculator client with the connection
-var client = thrift.createClient(Calculator, connection);
+connection.on('connect', co.wrap(function*() {
+    try {
+        // Create a Calculator client with the connection
+        var client = thrift.createClient(Calculator, connection);
 
 
-client.ping()
-    .then(function() {
-        console.log('ping()');
-    });
+        var pinged = yield client.ping();
+        console.log(pinged);
 
-client.add(1,1)
-    .then(function(response) {
-        console.log("1+1=" + response);
-    });
+        var addResult = yield client.add(1, 1);
+        console.log("1+1=" + addResult);
 
-work = new ttypes.Work();
-work.op = ttypes.Operation.DIVIDE;
-work.num1 = 1;
-work.num2 = 0;
+        var work = new ttypes.Work();
+        work.op = ttypes.Operation.DIVIDE;
+        work.num1 = 1;
+        work.num2 = 1;
+        var divideResult = yield client.calculate(1, work);
+        console.log(divideResult);
 
-client.calculate(1, work)
-    .then(function(message) {
-        console.log('Whoa? You know how to divide by zero?');
-    })
-    .fail(function(err) {
-        console.log("InvalidOperation " + err);
-    });
+        work.op = ttypes.Operation.SUBTRACT;
+        work.num1 = 15;
+        work.num2 = 10;
+        var subtractResult = yield client.calculate(2, work);
+        console.log('subtractResult: ', subtractResult);
 
+        var struct = yield client.getStruct(2);
+        console.log('Check log: ' + JSON.stringify(struct));
 
-work.op = ttypes.Operation.SUBTRACT;
-work.num1 = 15;
-work.num2 = 10;
-
-client.calculate(1, work)
-    .then(function(value) {
-        console.log('15-10=' + value);
-        return client.getStruct(1);
-    })
-    .then(function(message) {
-        console.log('Check log: ' + message.value);
-    })
-    .fin(function() {
+    } catch (err) {
+        console.log(err);
+    } finally {
         //close the connection once we're done
-        connection.end();
-    });
+        connection && connection.end();
+    }
+}));
