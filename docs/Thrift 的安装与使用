@@ -1,0 +1,107 @@
+
+
+## Thrift的安装与使用
+
+### thrift的安装
+
+#### 下载源代码
+  到官网下载thrift源代码: [官网下载地址](http://thrift.apache.org/download).
+
+ 这里使用git克隆源代码.
+  `git clone https://git-wip-us.apache.org/repos/asf/thrift.git thrift`
+
+#### 编译安装thrift.
+[教程](https://github.com/apache/thrift)
+`./bootstrap.sh`
+`./configure`
+`make`
+`make install`
+
+#### 测试
+`thrift -help` 显示thrift帮助列表
+
+#### 编译遇到的问题
+
+##### java maven仓库
+
+thrift自带的maven仓库为 `http://repo1.maven.org/maven2`
+在国内的下载速度基本为零,
+修改 thrift目录下 /lib/java/build.properties 中的 mvn.repo 为:
+阿里的maven仓库 `http://maven.aliyun.com/nexus/content/repositories/central`
+
+#### ruby依赖安装问题
+
+编译时一部分ruby依赖安装不了
+`apt-get install ruby-dev`
+
+#### 编译自定义thrift消息协议文件
+`test.thrift`
+```
+service Calculator{
+   i32 add(1:i32 num1, 2:i32 num2),
+}
+```
+
+#### 服务端
+`server.js`
+```
+var thrift = require("thrift");
+var Calculator = require("./thriftMessage/Calculator");
+
+
+var server = thrift.createServer(Calculator, {
+    add: function(n1, n2) {
+        console.log("add(", n1, ",", n2, ")");
+        return n1 + n2;
+    }
+});
+
+server.listen(9090);
+```
+
+#### 客户端
+`client.js`
+
+```
+'use strict';
+var thrift = require('thrift');
+var Calculator = require('./thriftMessage/Calculator');
+var co = require('co');
+
+var transport = thrift.TBufferedTransport;
+var protocol = thrift.TBinaryProtocol;
+
+var connection = thrift.createConnection("localhost", 9090, {
+    transport: transport,
+    protocol: protocol
+});
+
+
+connection.on('error', function (err) {
+    assert(false, err);
+});
+
+connection.on('connect', co.wrap(function*() {
+    try {
+        // Create a Calculator client with the connection
+        var client = thrift.createClient(Calculator, connection);
+
+        var addResult = yield client.add(1, 1);
+        console.log("1+1=" + addResult);
+
+    } catch (err) {
+      console.log("未知错误: ", err);
+    } finally {
+        //close the connection once we're done
+        connection && connection.end();
+    }
+}));
+```
+
+#### 运行
+`node server.js`
+`node client.js`
+
+#### 结果
+`1+1=2`
+
