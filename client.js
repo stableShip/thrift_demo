@@ -46,7 +46,11 @@ connection.on('connect', co.wrap(function*() {
         console.log('Check log: ' + JSON.stringify(struct));
 
     } catch (err) {
-        console.log(err);
+        if(err instanceof ttypes.InvalidOperation){
+            console.log("无效的操作: ", err.why);
+        }else{
+            console.log("未知错误: ", err);
+        }
     } finally {
         //close the connection once we're done
         connection && connection.end();

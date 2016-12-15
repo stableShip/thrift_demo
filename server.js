@@ -1,6 +1,6 @@
 var thrift = require("thrift");
 var Calculator = require("./thriftMessage/Calculator");
-var ttypes = require("./gen-nodejsthriftMessage/tutorial_types");
+var ttypes = require("./thriftMessage/tutorial_types");
 var SharedStruct = require("./thriftMessage/shared_types").SharedStruct;
 
 var data = {};
