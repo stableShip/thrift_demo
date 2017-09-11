@@ -1,5 +1,7 @@
 ## Thrift_demo
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/stableShip/thrift_demo.svg)](https://greenkeeper.io/)
+
 thrift 测验程序
 
 ### start
